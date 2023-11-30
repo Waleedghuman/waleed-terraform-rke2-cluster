@@ -1,10 +1,6 @@
 #!/bin/bash
-
 export INSTALL_RKE2_VERSION=v1.24.10+rke2r1
-
 mkdir -p /etc/rancher/rke2/
-
-
 cat <<EOF >/etc/rancher/rke2/config.yaml
 token: ${1}
 server: https://${2}:9345
@@ -16,7 +12,6 @@ tls-san:
   - ${6}
   - ${7}
 EOF
-
 curl -sfL https://get.rke2.io | sh -
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
@@ -29,24 +24,3 @@ systemctl start rke2-server.service
 # # $5: TLS SAN 2
 # # $6: TLS SAN 3
 # # $7: TLS SAN 4
-# export INSTALL_RKE2_VERSION=v1.24.10+rke2r1
-
-
-# mkdir -p /etc/rancher/rke2/
-
-
-# cat <<EOF >/etc/rancher/rke2/config.yaml
-# token: ${1}
-# server: https://${2}:9345
-# node-name: ${3}
-# cni: calico
-# disable: rke2-ingress-nginx
-# cloud-provider-name: aws
-# tls-san:
-#   - ${4}
-#   - ${5}
-# EOF
-
-# curl -sfL https://get.rke2.io | sh -
-# systemctl enable rke2-server.service
-# systemctl start rke2-server.service

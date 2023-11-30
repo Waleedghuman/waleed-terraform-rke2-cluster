@@ -6,10 +6,6 @@ output "public_ip" {
   value = aws_instance.main.public_ip
 }
 
-# output "default_user" {
-#   value = aws_instance.main.
-# }
-
 output "network_interface_id" {
   value = aws_instance.main.primary_network_interface_id
 }

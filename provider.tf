@@ -1,5 +1,4 @@
 terraform {
-
   required_providers {
     aws = {
       source = "hashicorp/aws"
@@ -10,8 +9,6 @@ terraform {
     }
   }
 }
-
-
 provider "aws" {
   region     = var.region
   access_key = var.aws_access_key

@@ -27,18 +27,10 @@ variable "ebs_volume_size_masters" {
   default     = 20
 }
 
-
-
 variable "ebs_volume_size_workers" {
   type    = number
   default = 20
 }
-
-
-
-# variable "cluster_machine_count" {
-#   default = 1
-# }
 
 variable "tags" {
   description = "A mapping of tags to assign to the resource"

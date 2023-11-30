@@ -1,3 +1,6 @@
+
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
 # Masters module
 module "masters" {
   source                      = "./ec2"
@@ -28,9 +31,6 @@ module "workers" {
   ebs_volume                  = var.ebs_volume_size_workers
 }
 
-
-
-
 locals {
   master_private_ips = [
     for i in range(0, var.rancher_masters_count) : module.masters["master${i}"].private_ip
@@ -42,11 +42,6 @@ locals {
     for i in range(0, var.rancher_workers_count) : module.workers["worker${i}"].private_ip
   ]
 }
-
-
-
-
-
 
 resource "aws_route53_record" "main" {
   count   = var.rancher_masters_count != 0 ? 1 : 0
@@ -112,9 +107,6 @@ resource "null_resource" "remote_exec_masters" {
     ]
   }
 }
-
-
-
 resource "null_resource" "remote_exec_workers" {
   count = var.rancher_workers_count
 
@@ -136,42 +128,11 @@ resource "null_resource" "remote_exec_workers" {
       "until sudo cloud-init status --wait > /dev/null 2>&1; do sleep 1; done",
       "echo 'Completed cloud-init!'",
       "sudo bash /tmp/install.sh '${module.masters["master0"].private_ip}' '${data.external.get_token[0].result.token}' '${module.workers["worker${count.index}"].hostname}' ${join("' '", local.master_private_ips)} '${aws_route53_record.main[0].fqdn}'",
-      # "sudo bash /tmp/install.sh '${module.masters["master0"].private_ip}' '${data.external.get_token[0].result.token}' '${module.workers["worker${count.index}"].hostname}' '${join("' '", local.master_private_ips)}' '${aws_route53_record.main[0].fqdn}'",
-      # "sudo bash /tmp/install.sh '${module.masters["master0"].private_ip}' '${data.external.get_token[0].result.token}' '${module.masters["worker${count.index}"].hostname}''${join("' '", local.master_private_ips)}' '${aws_route53_record.main[0].fqdn}'",
-      # "sudo bash /tmp/install.sh '${aws_route53_record.main[0].fqdn}' '${data.external.get_token[0].result.token}' '${join("' '", local.master_private_ips)}'",
-      # "sudo bash /tmp/install.sh '${data.external.get_token[0].result.token}' '${module.masters["master0"].private_ip}' '${module.masters["master${count.index + 1}"].hostname}' '${join("' '", local.master_private_ips)}' '${aws_route53_record.main[0].fqdn}'",
       "sleep 10",
       "exit",
     ]
   }
 }
-# resource "null_resource" "remote_exec_workers" {
-#   count = var.rancher_workers_count
-
-#   connection {
-#     host        = module.workers["worker${count.index}"].public_ip # it will start from 0 count.index
-#     type        = "ssh"
-#     user        = var.ssh_user
-#     private_key = file(var.private_key_path)
-#   }
-
-#   provisioner "file" {
-#     source      = "scripts/workers.sh"
-#     destination = "/tmp/install.sh"
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "echo 'Waiting for cloud-init to complete...'",
-#       "until sudo cloud-init status --wait > /dev/null 2>&1; do sleep 1; done",
-#       "echo 'Completed cloud-init!'",
-#       "sudo bash /tmp/install.sh '${aws_route53_record.main[0].fqdn}'",
-#       "sleep 10",
-#       "exit",
-#     ]
-#   }
-# }
-
 # Retrieve the token using an external data source
 data "external" "get_token" {
   count = var.rancher_masters_count != 0 ? 1 : 0
@@ -183,63 +144,6 @@ data "external" "get_token" {
   depends_on = [null_resource.remote_exec_master0[0]]
 }
 
-# Configure remote execution for Rancher installation
-
-# resource "null_resource" "remote_exec_rancher" {
-#   count = var.rancher_masters_count != 0 ? 1 : 0
-#   connection {
-#     host        = module.masters["master0"].public_ip
-#     type        = "ssh"
-#     user        = var.ssh_user
-#     private_key = file(var.private_key_path)
-#   }
-
-#   provisioner "file" {
-#     source      = "scripts/rancher.sh"
-#     destination = "/tmp/install.sh"
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "set -e",
-#       "echo 'Waiting for cloud-init to complete...'",
-#       "until sudo cloud-init status --wait > /dev/null 2>&1; do sleep 1; done",
-#       "echo 'Completed cloud-init!'",
-#       "sudo bash /tmp/install.sh '${aws_route53_record.main[0].fqdn}'",
-#       "sleep 10",
-#       "exit",
-#     ]
-#   }
-#   depends_on = [null_resource.remote_exec_masters[0], null_resource.remote_exec_workers]
-# }
-
-# resource "null_resource" "remote_exec_rancher" {
-#   count = var.rancher_masters_count != 0 ? 1 : 0
-#   connection {
-#     host        = module.masters["master0"].public_ip
-#     type        = "ssh"
-#     user        = var.ssh_user
-#     private_key = file(var.private_key_path)
-#   }
-
-#   provisioner "file" {
-#     source      = "scripts/rancher.sh"
-#     destination = "/tmp/install.sh"
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "set -e",
-#       "echo 'Waiting for cloud-init to complete...'",
-#       "until sudo cloud-init status --wait > /dev/null 2>&1; do sleep 1; done",
-#       "echo 'Completed cloud-init!'",
-#       "sudo bash /tmp/install.sh '${aws_route53_record.main[0].fqdn}'",
-#       "sleep 10",
-#       "exit",
-#     ]
-#   }
-#   depends_on = [null_resource.remote_exec_masters[0]]
-# }
 #=================================================================================================
 
 
