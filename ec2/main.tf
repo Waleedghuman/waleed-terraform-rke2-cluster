@@ -104,7 +104,7 @@ resource "aws_instance" "main" {
     volume_size = var.ebs_volume
   }
   tags = {
-    Name = "${local.resource_name}_ec2"
+    Name = "${local.resource_name}"
   }
 }
 

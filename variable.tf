@@ -17,6 +17,25 @@ variable "rancher_masters_count" {
   default = 0
 }
 
+variable "rancher_workers_count" {
+  default = 0
+}
+
+variable "ebs_volume_size_masters" {
+  description = "Size of the EBS volume in gigabytes"
+  type        = number
+  default     = 20
+}
+
+
+
+variable "ebs_volume_size_workers" {
+  type    = number
+  default = 20
+}
+
+
+
 # variable "cluster_machine_count" {
 #   default = 1
 # }
@@ -26,7 +45,7 @@ variable "tags" {
   type        = map(string)
   default = {
     "Owner"       = "waleed"
-    "Group"       = "puffersoft"
+    "Group"       = "rke2"
     "Environment" = "test"
   }
 }
