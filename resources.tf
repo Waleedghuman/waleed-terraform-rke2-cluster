@@ -1,6 +1,3 @@
-
-variable "aws_access_key" {}
-variable "aws_secret_key" {}
 # Masters module
 module "masters" {
   source                      = "./ec2"
